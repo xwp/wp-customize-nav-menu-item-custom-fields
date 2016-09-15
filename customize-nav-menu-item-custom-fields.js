@@ -6,6 +6,7 @@ var CustomizeNavMenuItemCustomFields = (function( $ ) {
 
 	var component = {
 		api: null,
+		hasSaved: false,
 		data: {
 			metaKeys: [],
 			l10n: {
@@ -39,7 +40,12 @@ var CustomizeNavMenuItemCustomFields = (function( $ ) {
 		api.control.each( component.prepareCustomFields );
 		api.control.bind( 'add', component.prepareCustomFields );
 
-		// @todo Delete postmeta when nav menu is removed?
+		// @todo Delete postmeta (or clear _dirty flag) when nav menu is removed?
+
+		// @todo The hasSaved property is needed because of a core bug where expanded set but instead a class is being toggled directly: https://github.com/xwp/wordpress-develop/blob/a803a33c04dfd083b5b012ba1e8c79752209ac3c/src/wp-admin/js/customize-nav-menus.js#L2909
+		api.bind( 'saved', function() {
+			component.hasSaved = true;
+		} );
 
 		// Export the component to be available at wp.customize.Menus.ItemCustomFields.
 		component.api.Menus.ItemCustomFields = component;
@@ -115,6 +121,8 @@ var CustomizeNavMenuItemCustomFields = (function( $ ) {
 		component.requestItemsPostmetaSettingsTimeoutId = setTimeout( function() {
 			var ensurePostsPromise = component.api.Posts.ensurePosts( component.pendingRequestPostmetaSettingsItemIds );
 			component.pendingRequestPostmetaSettingsItemIds = [];
+			component.requestItemsPostmetaSettingsDeferred = null;
+			component.requestItemsPostmetaSettingsTimeoutId = null;
 			ensurePostsPromise.done( function( gatheredFetchedPostsData ) {
 				var postmetaSettings = {};
 
@@ -242,7 +250,7 @@ var CustomizeNavMenuItemCustomFields = (function( $ ) {
 
 		// Defer initializing custom fields until the control is embedded and expanded. This improves DOM performance.
 		control.deferred.embedded.done( function() {
-			if ( control.expanded.get() ) {
+			if ( component.hasSaved || control.expanded.get() ) {
 				component.initializeCustomFields( control );
 			} else {
 				control.expanded.bind( onceExpanded );
