@@ -8,23 +8,21 @@
 namespace Customize_Nav_Menu_Item_Custom_Fields\Examples;
 
 /**
- * Load the examples.
+ * Load the examples if Customize Posts is loaded.
  *
- * @param \WP_Customize_Manager $wp_customize Manager.
+ * @param array $components Components.
+ * @return array Components.
  */
-function load_examples( \WP_Customize_Manager $wp_customize ) {
-
-	// Make sure Customize Posts is active.
-	if ( ! isset( $wp_customize->posts ) ) {
-		return;
-	}
-
-	$example_dirs = glob( __DIR__ . '/*', \GLOB_ONLYDIR );
-	foreach ( $example_dirs as $example_dir ) {
-		$example_file = $example_dir . '/' . basename( $example_dir ) . '.php';
-		if ( 0 === validate_file( $example_file ) && file_exists( $example_file ) ) {
-			require_once $example_file;
+function load_examples( $components ) {
+	if ( in_array( 'posts', $components, true ) ) {
+		$example_dirs = glob( __DIR__ . '/*', \GLOB_ONLYDIR );
+		foreach ( $example_dirs as $example_dir ) {
+			$example_file = $example_dir . '/' . basename( $example_dir ) . '.php';
+			if ( 0 === validate_file( $example_file ) && file_exists( $example_file ) ) {
+				require_once $example_file;
+			}
 		}
 	}
+	return $components;
 }
-add_action( 'customize_register', __NAMESPACE__ . '\load_examples' );
+add_filter( 'customize_loaded_components', __NAMESPACE__ . '\load_examples', 100 );

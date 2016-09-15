@@ -1,0 +1,4 @@
+.custom-fields > .custom-fields-loading-message > .spinner {
+	visibility: visible;
+	margin: 0;
+}

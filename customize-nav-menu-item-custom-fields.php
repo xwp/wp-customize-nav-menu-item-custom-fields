@@ -29,6 +29,8 @@
 namespace Customize_Nav_Menu_Item_Custom_Fields;
 
 const SCRIPT_HANDLE = 'customize-nav-menu-item-custom-fields';
+const STYLE_HANDLE = 'customize-nav-menu-item-custom-fields';
+const VERSION = '0.1.0';
 
 /**
  * Show admin notice when Customize Posts is not active.
@@ -68,17 +70,53 @@ function customize_controls_enqueue_scripts() {
 		return;
 	}
 
+	/**
+	 * Customize Posts
+	 *
+	 * @var \WP_Customize_Posts $customize_posts
+	 */
+	$customize_posts = $wp_customize->posts;
+
 	$src = plugins_url( 'customize-nav-menu-item-custom-fields.js', __FILE__ );
 	$deps = array( 'customize-controls', 'customize-nav-menus', 'customize-posts' );
-	$ver = false;
 	$in_footer = true;
-	wp_enqueue_script( SCRIPT_HANDLE, $src, $deps, $ver, $in_footer );
+	wp_enqueue_script( SCRIPT_HANDLE, $src, $deps, VERSION, $in_footer );
+
+	$exports = array(
+		'metaKeys' => array(),
+		'l10n' => array(
+			'postmeta_setting_fetch_failure' => __( 'Failed to fetch custom field data.', 'customize-nav-menu-item-custom-fields' ),
+		),
+	);
+	if ( ! empty( $customize_posts->registered_post_meta['nav_menu_item'] ) ) {
+		$exports['metaKeys'] = array_keys( $customize_posts->registered_post_meta['nav_menu_item'] );
+	}
 
 	wp_add_inline_script(
 		SCRIPT_HANDLE,
-		sprintf( 'wp.customize.Menus.CustomFields.init( wp.customize );' ),
+		sprintf( 'CustomizeNavMenuItemCustomFields.init( wp.customize, %s );', wp_json_encode( $exports ) ),
 		'after'
 	);
+
+	$src = plugins_url( 'customize-nav-menu-item-custom-fields.css', __FILE__ );
+	$deps = array( 'customize-controls' );
+	wp_enqueue_style( STYLE_HANDLE, $src, $deps, VERSION );
 };
 
 add_action( 'customize_controls_enqueue_scripts', __NAMESPACE__ . '\customize_controls_enqueue_scripts' );
+
+
+/**
+ * Print field template.
+ */
+function print_field_template() {
+	?>
+	<script id="tmpl-customize-nav-menu-item-custom-fields-loading-message" type="text/html">
+		<p class="custom-fields-loading-message">
+			<span class="spinner"></span>
+			<?php esc_html_e( 'Custom fields are loading.', 'customize-nav-menu-item-custom-fields' ) ?>
+		</p>
+	</script>
+	<?php
+}
+add_action( 'customize_controls_print_footer_scripts', __NAMESPACE__ . '\print_field_template' );

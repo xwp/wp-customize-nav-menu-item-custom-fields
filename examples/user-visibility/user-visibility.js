@@ -34,36 +34,6 @@ var CustomizeNavMenuItemUserVisibility = (function( $ ) {
 		}
 
 		api.Menus.ItemCustomFields.bind( 'initialize', component.initializeCustomField );
-
-		/*
-		 function() {
-		 api.Menus.ItemCustomFields.oncePostmetaSettingsExist( args.metaKeys ).done( function() {
-		 component.initCustomField();
-		 } );
-		 }
-		 */
-	};
-
-	/**
-	 * Prepare custom fields.
-	 *
-	 * @param {object} args - Args.
-	 * @param {Number} args.postmetaSettingIdBase - ID base for the postmeta setting ID, e.g. postmeta[nav_menu_item][123].
-	 * @returns {void}
-	 */
-	component.initializeCustomField = function initCustomField( args ) {
-
-		//component.api.Menus.ItemCustomFields.ensurePostmetaSettings( args.postId, component.data.metaKeys ).done( function() {
-		//	component.initCustomField();
-		//} );
-
-		var settingIds = _.map( component.data.metaKeys, function( metaKey ) {
-			return args.postmetaSettingIdBase + '[' + metaKey + ']';
-		} );
-
-		component.api.apply( component.api, settingIds.concat( function uponSettingsInitialized() {
-			component.finalizeCustomField( args );
-		} ) );
 	};
 
 	/**
@@ -71,13 +41,24 @@ var CustomizeNavMenuItemUserVisibility = (function( $ ) {
 	 *
 	 * @param {object} args - Args.
 	 * @param {Number} args.postId - Post ID for nav menu item.
-	 * @param {Number} args.postmetaSettingIdBase - ID base for the postmeta setting ID, e.g. postmeta[nav_menu_item][123].
+	 * @param {object} args.metaSettings - Postmeta settings keyed by meta key.
 	 * @param {wp.customize.Control} args.control - Control.
 	 * @param {jQuery} args.container - Container for custom fields.
 	 * @returns {void}
 	 */
-	component.finalizeCustomField = function embedFieldContainer( args ) {
-		var template, fieldContainer;
+	component.initializeCustomField = function initializeCustomField( args ) {
+		var template, fieldContainer, hasRequiredMeta = true;
+
+		// This is somewhat redundant and shouldn't actually happen.
+		_.each( component.data.metaKeys, function( metaKey ) {
+			if ( ! args.metaSettings[ metaKey ] ) {
+				hasRequiredMeta = false;
+			}
+		} );
+		if ( ! hasRequiredMeta ) {
+			return;
+		}
+
 		template = wp.template( component.data.templateId );
 		fieldContainer = $( template( {} ) );
 		args.container.append( fieldContainer );
@@ -86,12 +67,15 @@ var CustomizeNavMenuItemUserVisibility = (function( $ ) {
 			var input, metaKey, element, setting;
 			input = $( this );
 			metaKey = input.data( 'customize-postmeta-key-setting-link' );
-			setting = component.api( args.postmetaSettingIdBase + '[' + metaKey + ']' );
+			setting = args.metaSettings[ metaKey ];
 
-			// @todo Support radios.
-			element = new component.api.Element( input );
-			element.sync( setting );
-			element.set( setting() );
+			if ( setting ) {
+
+				// @todo Support radios.
+				element = new component.api.Element( input );
+				element.sync( setting );
+				element.set( setting() );
+			}
 		} );
 	};
 

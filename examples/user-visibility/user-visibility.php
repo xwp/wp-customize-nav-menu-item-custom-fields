@@ -33,10 +33,10 @@ add_action( 'init', __NAMESPACE__ . '\register_meta' );
  */
 function customize_posts_register_meta( \WP_Customize_Posts $customize_posts ) {
 	$customize_posts->register_post_type_meta( 'nav_menu_item', META_KEY, array(
-		'transport' => 'refresh',
+		'transport' => 'refresh', // @todo postMessage?
 	) );
 }
-add_action( 'customize_posts_register_meta', 'customize_posts_register_meta' );
+add_action( 'customize_posts_register_meta', __NAMESPACE__ . '\customize_posts_register_meta' );
 
 /**
  * Enqueue scripts.
