@@ -28,15 +28,16 @@
 
 namespace Customize_Nav_Menu_Item_Custom_Fields;
 
-const SCRIPT_HANDLE = 'customize-nav-menu-item-custom-fields';
-const STYLE_HANDLE = 'customize-nav-menu-item-custom-fields';
+const CONTROL_SCRIPT_HANDLE = 'customize-nav-menu-item-custom-fields';
+const CONTROL_STYLE_HANDLE  = 'customize-nav-menu-item-custom-fields';
+const PREVIEW_SCRIPT_HANDLE = 'customize-nav-menu-item-custom-fields-preview';
 const VERSION = '0.1.0';
 
 /**
  * Show admin notice when Customize Posts is not active.
  */
 function show_admin_notice() {
-	if ( 'plugins' !== get_current_screen()->base || wp_script_is( 'customize-posts' ) ) {
+	if ( 'plugins' !== get_current_screen()->base || wp_script_is( 'customize-posts', 'registered' ) ) {
 		return;
 	}
 	?>
@@ -80,7 +81,7 @@ function customize_controls_enqueue_scripts() {
 	$src = plugins_url( 'customize-nav-menu-item-custom-fields.js', __FILE__ );
 	$deps = array( 'customize-controls', 'customize-nav-menus', 'customize-posts' );
 	$in_footer = true;
-	wp_enqueue_script( SCRIPT_HANDLE, $src, $deps, VERSION, $in_footer );
+	wp_enqueue_script( CONTROL_SCRIPT_HANDLE, $src, $deps, VERSION, $in_footer );
 
 	$exports = array(
 		'metaKeys' => array(),
@@ -93,18 +94,39 @@ function customize_controls_enqueue_scripts() {
 	}
 
 	wp_add_inline_script(
-		SCRIPT_HANDLE,
+		CONTROL_SCRIPT_HANDLE,
 		sprintf( 'CustomizeNavMenuItemCustomFields.init( wp.customize, %s );', wp_json_encode( $exports ) ),
 		'after'
 	);
 
 	$src = plugins_url( 'customize-nav-menu-item-custom-fields.css', __FILE__ );
 	$deps = array( 'customize-controls' );
-	wp_enqueue_style( STYLE_HANDLE, $src, $deps, VERSION );
+	wp_enqueue_style( CONTROL_STYLE_HANDLE, $src, $deps, VERSION );
 };
 
 add_action( 'customize_controls_enqueue_scripts', __NAMESPACE__ . '\customize_controls_enqueue_scripts' );
 
+/**
+ * Enqueue preview scripts.
+ */
+function enqueue_preview_scripts() {
+	if ( ! is_customize_preview() ) {
+		return;
+	}
+
+	$src = plugins_url( 'customize-nav-menu-item-custom-fields-preview.js', __FILE__ );
+	$deps = array( 'customize-preview' );
+	$in_footer = true;
+	wp_enqueue_script( PREVIEW_SCRIPT_HANDLE, $src, $deps, VERSION, $in_footer );
+
+	$exports = array();
+	wp_add_inline_script(
+		PREVIEW_SCRIPT_HANDLE,
+		sprintf( 'CustomizeNavMenuItemCustomFieldsPreview.init( wp.customize, %s );', wp_json_encode( $exports ) ),
+		'after'
+	);
+};
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_preview_scripts' );
 
 /**
  * Print field template.
