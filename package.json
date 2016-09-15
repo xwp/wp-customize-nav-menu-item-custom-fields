@@ -1,0 +1,22 @@
+{
+  "name": "customize-nav-menu-item-custom-fields",
+  "title": "Customize Nav Menu Item Custom Fields",
+  "homepage": "https://github.com/xwp/wp-customize-nav-menu-item-custom-fields",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xwp/wp-customize-nav-menu-item-custom-fields.git"
+  },
+  "author": "XWP",
+  "license": "GPL-2.0+",
+  "devDependencies": {
+    "eslint": "^3.2.2",
+    "grunt": "~0.4.5",
+    "grunt-contrib-clean": "~1.0.0",
+    "grunt-contrib-copy": "~1.0.0",
+    "grunt-contrib-cssmin": "~1.0.1",
+    "grunt-contrib-jshint": "~1.0.0",
+    "grunt-contrib-uglify": "~1.0.1",
+    "grunt-shell": "~1.3.0",
+    "grunt-wp-deploy": "^1.1.0"
+  }
+}
