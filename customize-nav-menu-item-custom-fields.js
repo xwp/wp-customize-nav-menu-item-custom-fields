@@ -257,7 +257,7 @@ var CustomizeNavMenuItemCustomFields = (function( $ ) {
 	 * @returns {void}
 	 */
 	component.initializeCustomFields = function initializeCustomFields( control ) {
-		var promise, postId, matches, customFieldsContainer, loadingMessage;
+		var promise, postId, matches, customFieldsContainer, loadingMessage, pendingCreationNotice;
 		matches = control.id.match( /^nav_menu_item\[(-?\d+)]$/ );
 		if ( ! matches ) {
 			throw new Error( 'Unexpected control id: ' + control.id );
@@ -268,7 +268,14 @@ var CustomizeNavMenuItemCustomFields = (function( $ ) {
 		control.customFieldsContainer = customFieldsContainer;
 		control.container.find( '.menu-item-actions' ).before( customFieldsContainer );
 
-		loadingMessage = $( wp.template( 'customize-nav-menu-item-custom-fields-loading-message' )() );
+		// Postmeta cannot currently be managed for pre-inserted nav menu items, due to negative post IDs not being supported by get_post_meta().
+		if ( postId <= 0 ) {
+			pendingCreationNotice = $( $.trim( wp.template( 'customize-nav-menu-item-custom-fields-pending-creation-notice' )() ) );
+			customFieldsContainer.append( pendingCreationNotice );
+			return;
+		}
+
+		loadingMessage = $( $.trim( wp.template( 'customize-nav-menu-item-custom-fields-loading-message' )() ) );
 		customFieldsContainer.append( loadingMessage );
 
 		promise = component.ensureItemPostmetaSettings( postId );

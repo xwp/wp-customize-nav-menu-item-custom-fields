@@ -139,6 +139,11 @@ function print_field_template() {
 			<?php esc_html_e( 'Custom fields are loading.', 'customize-nav-menu-item-custom-fields' ) ?>
 		</p>
 	</script>
+	<script id="tmpl-customize-nav-menu-item-custom-fields-pending-creation-notice" type="text/html">
+		<p class="custom-fields-pending-creation-notice notice notice-info">
+			<?php esc_html_e( 'Custom fields will be available once this item is first saved.', 'customize-nav-menu-item-custom-fields' ) ?>
+		</p>
+	</script>
 	<?php
 }
 add_action( 'customize_controls_print_footer_scripts', __NAMESPACE__ . '\print_field_template' );

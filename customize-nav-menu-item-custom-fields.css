@@ -1,4 +1,7 @@
-.custom-fields > .custom-fields-loading-message > .spinner {
+.menu-item-settings > .custom-fields {
+	clear:both;
+}
+.menu-item-settings > .custom-fields > .custom-fields-loading-message > .spinner {
 	visibility: visible;
 	margin: 0;
 }
