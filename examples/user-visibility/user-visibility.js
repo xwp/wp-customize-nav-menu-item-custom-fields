@@ -70,8 +70,6 @@ var CustomizeNavMenuItemUserVisibility = (function( $ ) {
 			setting = args.metaSettings[ metaKey ];
 
 			if ( setting ) {
-
-				// @todo Support radios.
 				element = new component.api.Element( input );
 				element.sync( setting );
 				element.set( setting() );
